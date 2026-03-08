@@ -1,26 +1,35 @@
-import { Routes, Route, Navigate } from "react-router-dom"
-import { useState, useEffect } from "react"
-import Chat from "./chat"
-import Login from "./routes/Login"
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import Chat from "./chat";
+import Levels from "./levels";
+import Login from "./routes/Login";
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   useEffect(() => {
-    const savedAuth = localStorage.getItem("nextep_auth")
-    setIsAuthenticated(savedAuth === "true")
-  }, [])
+    const savedAuth = localStorage.getItem("nextep_auth");
+    const savedUser = localStorage.getItem("nextep_user");
+
+    if (savedAuth === "true" && savedUser) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
 
   if (isAuthenticated === null) {
     return (
       <div className="h-screen flex items-center justify-center bg-black text-white">
         Loading...
       </div>
-    )
+    );
   }
 
   return (
     <Routes>
+
+      {/* LOGIN ROUTE */}
       <Route
         path="/login"
         element={
@@ -32,6 +41,7 @@ function App() {
         }
       />
 
+      {/* CHAT HOME ROUTE */}
       <Route
         path="/"
         element={
@@ -42,8 +52,23 @@ function App() {
           )
         }
       />
+
+      {/* ✅ LEVELS ROUTE ADDED */}
+     <Route
+        path="/levels/"
+        element={
+          isAuthenticated ? (
+            <Levels />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      {/* Optional fallback route */}
+      <Route path="*" element={<Navigate to="/" />} />
+
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;
