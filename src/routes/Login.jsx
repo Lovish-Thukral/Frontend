@@ -26,11 +26,11 @@ export default function Login({ setIsAuthenticated }) {
       localStorage.setItem("nextep_user", JSON.stringify(user));
       localStorage.setItem("user_id", user._id);
       localStorage.setItem("username", user.name);
+      localStorage.setItem("skills", JSON.stringify(user.skills || []));
       if (user.roadmapHistory?.length) localStorage.setItem("roadmap", JSON.stringify(user.roadmapHistory[0]));
       if (user.RIASEC_vals) localStorage.setItem("riasec", JSON.stringify(user.RIASEC_vals));
       if (user.SIFA_vals) localStorage.setItem("sifa", JSON.stringify(user.SIFA_vals));
       if (user.chatHistory) localStorage.setItem("chatHistory", JSON.stringify(user.chatHistory));
-
       setIsAuthenticated(true);
       navigate("/");
     } catch (error) {

@@ -7,13 +7,13 @@ import Login from "./routes/Login";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
 
-  const refreshUser = async (username) => {
+  const refreshUser = async (userID) => {
     try {
       const baseURL = import.meta.env.VITE_API_BASE_URL;
       const res = await fetch(`${baseURL}/main/RefreshUser`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: username }),
+        body: JSON.stringify({ userID }),  // ✅ was { name: username }
       });
 
       if (!res.ok) throw new Error("Failed to refresh user");
@@ -48,12 +48,11 @@ function App() {
 
   useEffect(() => {
     const savedAuth = localStorage.getItem("nextep_auth");
-    const savedUser = localStorage.getItem("user_id");
+    const savedUserID = localStorage.getItem("user_id");  // ✅ renamed for clarity
 
-    if (savedAuth === "true" && savedUser) {
+    if (savedAuth === "true" && savedUserID) {
       setIsAuthenticated(true);
-      // Fire refresh in background — don't block auth
-      refreshUser(savedUser);
+      refreshUser(savedUserID);  // ✅ passing the actual _id
     } else {
       setIsAuthenticated(false);
     }

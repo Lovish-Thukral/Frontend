@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import ChatMessage from "./components/ChatMessage";
 import ChatInput from "./components/ChatInput";
 
+// Normalize API shape ({ message }) → UI shape ({ content })
+const normalizeSession = (session) =>
+  session.map((m) => ({ ...m, content: m.content ?? m.message ?? "" }));
+
 export default function Chat({ setIsAuthenticated }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,8 +21,9 @@ export default function Chat({ setIsAuthenticated }) {
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("nextep_user"));
     setUser(storedUser);
-    const storedHistory = JSON.parse(localStorage.getItem("chatHistory") || "[]");
-    setChatHistory(storedHistory);
+    const raw = JSON.parse(localStorage.getItem("chatHistory") || "[]");
+    // Normalize every session on load
+    setChatHistory(raw.map(normalizeSession));
   }, []);
 
   useEffect(() => {
@@ -50,7 +55,8 @@ export default function Chat({ setIsAuthenticated }) {
 
   const getSessionTitle = (session) => {
     const first = session.find((m) => m.role === "user");
-    return first ? first.content.slice(0, 36) + (first.content.length > 36 ? "…" : "") : "Chat session";
+    const text = first?.content ?? first?.message ?? "";
+    return text ? text.slice(0, 36) + (text.length > 36 ? "…" : "") : "Chat session";
   };
 
   // Buffer flush: sends name + riasec + sifa + messages
@@ -96,7 +102,7 @@ export default function Chat({ setIsAuthenticated }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          UserData: { RIASEC: riasec, SIFA: sifa, },
+          UserData: { RIASEC: riasec, SIFA: sifa },
           messages: updatedMessages,
         }),
       });
@@ -504,7 +510,9 @@ export default function Chat({ setIsAuthenticated }) {
           <div className="messages-area">
             {messages.length === 0 && !loading ? (
               <div className="empty-state">
-                <div className="empty-icon"> <img src="src/assets/logo.png" alt="Empty" className="h-48" /> </div>
+                <div className="empty-icon">
+                  <img src="src/assets/logo.png" alt="Empty" className="h-48" />
+                </div>
                 <div className="empty-title text-amber-50">What's on your mind?</div>
                 <div className="empty-sub text-amber-50">Ask anything about your career path</div>
               </div>
